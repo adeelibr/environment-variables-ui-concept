@@ -1,6 +1,6 @@
 export type Environment = "development" | "preview" | "production"
 
-export interface EnvVar {
+export interface EnvironmentVariable {
   id: string
   name: string
   values: {
@@ -9,10 +9,13 @@ export interface EnvVar {
     production?: string
   }
   isSecret: boolean
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
   description?: string
 }
+
+// Alias for backward compatibility
+export type EnvVar = EnvironmentVariable
 
 export interface AuditEvent {
   id: string
@@ -33,7 +36,7 @@ export interface DragOperation {
 
 export type ChangeAction = "create" | "update" | "delete"
 
-export interface EnvVarChange {
+export interface Change {
   id: string
   varId?: string // undefined for new variables
   name: string
@@ -46,7 +49,7 @@ export interface EnvVarChange {
   }
   isSecret: boolean
   description?: string
-  timestamp: Date
+  timestamp?: Date
   metadataChanges?: {
     name?: { before: string; after: string }
     description?: { before?: string; after: string }
@@ -54,15 +57,20 @@ export interface EnvVarChange {
   }
 }
 
+// Alias for backward compatibility
+export type EnvVarChange = Change
+
 export interface ChangeSet {
   id: string
   name: string
   description?: string
-  changes: EnvVarChange[]
-  createdAt: Date
-  updatedAt: Date
+  changes: Change[]
+  environments: Environment[]
   status: "draft" | "ready" | "applied" | "reverted"
-  conflicts: ConflictInfo[]
+  createdAt: string
+  updatedAt: string
+  appliedAt?: string
+  conflicts?: ConflictInfo[]
 }
 
 export interface ConflictInfo {

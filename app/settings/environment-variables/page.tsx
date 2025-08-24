@@ -4,8 +4,8 @@ import { useState, useEffect } from "react"
 import { Plus, GitBranch, Upload, Download, Search, Filter, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useEnvVariables } from "@/hooks/use-env-variables"
-import { useChangeSets } from "@/hooks/use-change-sets"
+import { useEnvState } from "@/hooks/use-env-state"
+import { useEnvHistory } from "@/hooks/use-env-history"
 import { useEnvSearch } from "@/hooks/use-env-search"
 import { useWalkthrough } from "@/hooks/use-walkthrough"
 import { ChangeSetDrawer } from "@/components/change-sets/change-set-drawer"
@@ -18,8 +18,8 @@ import { AppWalkthrough } from "@/components/walkthrough/app-walkthrough"
 import type { EnvironmentVariable } from "@/types/env-vars"
 
 export default function EnvironmentVariablesPage() {
-  const { variables } = useEnvVariables()
-  const { getCurrentChangeSet, getOrCreateCurrentChangeSet } = useChangeSets()
+  const { variables } = useEnvState()
+  const { getCommitHistory } = useEnvHistory()
   const { hasCompletedWalkthrough, markWalkthroughComplete } = useWalkthrough()
   const {
     searchQuery,
@@ -33,7 +33,7 @@ export default function EnvironmentVariablesPage() {
     clearFilters,
   } = useEnvSearch(variables)
 
-  const currentChangeSet = getCurrentChangeSet()
+  const commitHistory = getCommitHistory()
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isBulkPasteOpen, setIsBulkPasteOpen] = useState(false)
@@ -50,27 +50,22 @@ export default function EnvironmentVariablesPage() {
   }, [hasCompletedWalkthrough])
 
   const handleOpenDrawer = () => {
-    getOrCreateCurrentChangeSet()
     setIsDrawerOpen(true)
   }
 
   const handleAddVariable = () => {
-    getOrCreateCurrentChangeSet()
     setIsAddFormOpen(true)
   }
 
   const handleEditVariable = (variable: EnvironmentVariable) => {
-    getOrCreateCurrentChangeSet()
     setEditingVariable(variable)
   }
 
   const handleBulkEdit = () => {
-    getOrCreateCurrentChangeSet()
     setIsBulkEditOpen(true)
   }
 
   const handleBulkImport = () => {
-    getOrCreateCurrentChangeSet()
     setIsBulkPasteOpen(true)
   }
 
@@ -124,8 +119,8 @@ export default function EnvironmentVariablesPage() {
 
               <Button onClick={handleOpenDrawer} className="relative" data-walkthrough="change-sets">
                 <GitBranch className="h-4 w-4 mr-2" />
-                Change Set {currentChangeSet && `(${currentChangeSet.changes.length})`}
-                {currentChangeSet && currentChangeSet.changes.length > 0 && (
+                History {commitHistory.length > 0 && `(${commitHistory.length})`}
+                {commitHistory.length > 0 && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full" />
                 )}
               </Button>

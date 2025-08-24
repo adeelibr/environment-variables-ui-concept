@@ -5,8 +5,8 @@ import { Eye, EyeOff, Edit, Trash2, Copy, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { useChangeSets } from "@/hooks/use-change-sets"
-import { useEnvVariables } from "@/hooks/use-env-variables"
+import { useEnvState } from "@/hooks/use-env-state"
+import { useEnvHistory } from "@/hooks/use-env-history"
 import type { EnvironmentVariable, Environment } from "@/types/env-vars"
 
 interface EnvVarsTableProps {
@@ -15,8 +15,8 @@ interface EnvVarsTableProps {
 }
 
 export function EnvVarsTable({ variables, onEditVariable }: EnvVarsTableProps) {
-  const { addChangeToSet, getOrCreateCurrentChangeSet } = useChangeSets()
-  const { updateVariable, deleteVariable } = useEnvVariables()
+  const { updateVariable, deleteVariable } = useEnvState()
+  const { addHistoryEntry } = useEnvHistory()
 
   const [visibleSecrets, setVisibleSecrets] = useState<Set<string>>(new Set())
   const [editingVar, setEditingVar] = useState<string | null>(null)

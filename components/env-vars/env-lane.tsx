@@ -1,7 +1,7 @@
 "use client"
 
-import type { Environment, EnvVar } from "@/types/env-vars"
-import { useEnvVarsStore } from "@/lib/env-vars-store"
+import type { Environment, EnvironmentVariable } from "@/types/env-vars"
+import { useEnvSelection } from "@/hooks/use-env-selection"
 import { EnvVarCard } from "./env-var-card"
 import { Badge } from "@/components/ui/badge"
 import { Plus } from "lucide-react"
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
 
 interface EnvLaneProps {
   environment: Environment
-  variables: EnvVar[]
+  variables: EnvironmentVariable[]
   className?: string
 }
 
@@ -33,7 +33,7 @@ const environmentConfig = {
 }
 
 export function EnvLane({ environment, variables, className }: EnvLaneProps) {
-  const { selectedVarIds, selectVariable } = useEnvVarsStore()
+  const { selectedVarIds, selectVariable } = useEnvSelection()
 
   const config = environmentConfig[environment]
   const varsWithValues = variables.filter((v) => v.values[environment] !== undefined)

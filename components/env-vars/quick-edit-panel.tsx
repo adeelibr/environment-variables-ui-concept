@@ -1,81 +1,64 @@
 "use client"
 
 import { useState } from "react"
-import { Save, X, Eye, EyeOff } from "lucide-react"
+import { Save, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
-import { useChangeSets } from "@/hooks/use-change-sets"
-import type { EnvVar, Environment } from "@/types/env-vars"
+import { EnvironmentInputs } from "@/components/common/environment-inputs"
+import { useEnvState } from "@/hooks/use-env-state"
+import { useEnvHistory } from "@/hooks/use-env-history"
+import type { EnvironmentVariable, Environment } from "@/types/env-vars"
 
 interface QuickEditPanelProps {
-  variable: EnvVar | null
+  variable: EnvironmentVariable | null
   onClose: () => void
 }
 
 export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
-  const { addChange } = useChangeSets()
+  const { updateVariable } = useEnvState()
+  const { addHistoryEntry } = useEnvHistory()
 
-  const [showSecrets, setShowSecrets] = useState(false)
   const [formData, setFormData] = useState(() => {
     if (!variable) return { name: "", description: "", isSecret: false, values: {} }
     return {
       name: variable.name,
       description: variable.description || "",
       isSecret: variable.isSecret,
-      values: { ...variable.environments },
+      values: { ...variable.values },
     }
   })
-
-  const environments: { key: Environment; label: string }[] = [
-    { key: "development", label: "Development" },
-    { key: "preview", label: "Preview" },
-    { key: "production", label: "Production" },
-  ]
 
   const handleSave = () => {
     if (!variable) return
 
-    const changedEnvs: Environment[] = []
-    const values: any = {}
+    // Simple update - just update the variable directly
+    const updates = {
+      name: formData.name,
+      description: formData.description,
+      isSecret: formData.isSecret,
+      values: formData.values,
+    }
 
-    // Check for changes in each environment
-    environments.forEach(({ key }) => {
-      const oldValue = variable.environments?.[key]?.value || ""
-      const newValue = formData.values[key] || ""
+    updateVariable(variable.id, updates)
 
-      if (oldValue !== newValue) {
-        changedEnvs.push(key)
-        values[key] = { before: oldValue || undefined, after: newValue || undefined }
-      }
-    })
-
-    // Check for metadata changes
-    const metadataChanged =
-      variable.name !== formData.name ||
-      variable.description !== formData.description ||
-      variable.isSecret !== formData.isSecret
-
-    if (changedEnvs.length > 0 || metadataChanged) {
-      addChange({
+    // Track in history
+    addHistoryEntry(
+      "variable_updated",
+      `Updated ${formData.name}`,
+      [{
+        id: Date.now().toString(),
         varId: variable.id,
         name: formData.name,
         action: "update",
-        environments: changedEnvs.length > 0 ? changedEnvs : ["development"], // At least one env for metadata changes
-        values: changedEnvs.length > 0 ? values : {},
+        environments: ["development"], // Simplified - just track that it was updated
+        values: {},
         isSecret: formData.isSecret,
-        description: `Updated ${formData.name}${changedEnvs.length > 0 ? ` in ${changedEnvs.join(", ")}` : " (metadata)"}`,
-        metadataChanges: metadataChanged
-          ? {
-              name: { before: variable.name, after: formData.name },
-              description: { before: variable.description, after: formData.description },
-              isSecret: { before: variable.isSecret, after: formData.isSecret },
-            }
-          : undefined,
-      })
-    }
+        description: `Updated ${formData.name}`,
+      }]
+    )
 
     onClose()
   }
@@ -136,36 +119,14 @@ export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
             <Label htmlFor="edit-secret">Mark as secret</Label>
           </div>
 
-          {/* Show/Hide Secrets */}
-          {formData.isSecret && (
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={() => setShowSecrets(!showSecrets)}>
-                {showSecrets ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-                {showSecrets ? "Hide" : "Show"} Values
-              </Button>
-            </div>
-          )}
-
           {/* Environment Values */}
           <div className="space-y-4">
             <Label>Environment Values</Label>
-            <div className="space-y-3">
-              {environments.map(({ key, label }) => (
-                <div key={key} className="space-y-2">
-                  <Label htmlFor={`edit-${key}`} className="text-sm font-medium">
-                    {label}
-                  </Label>
-                  <Input
-                    id={`edit-${key}`}
-                    value={formData.values[key] || ""}
-                    onChange={(e) => handleValueChange(key, e.target.value)}
-                    placeholder={`Value for ${label.toLowerCase()}`}
-                    type={formData.isSecret && !showSecrets ? "password" : "text"}
-                    className="font-mono"
-                  />
-                </div>
-              ))}
-            </div>
+            <EnvironmentInputs
+              values={formData.values}
+              onChange={handleValueChange}
+              isSecret={formData.isSecret}
+            />
           </div>
 
           {/* Actions */}

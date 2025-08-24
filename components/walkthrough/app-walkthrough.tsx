@@ -186,11 +186,20 @@ export function AppWalkthrough({ isOpen, onClose }: AppWalkthroughProps) {
         const viewportWidth = window.innerWidth
         const viewportHeight = window.innerHeight
 
+        // Ensure the card stays within viewport bounds with more aggressive constraints
         newPosition.top = Math.max(
           20 + window.scrollY,
-          Math.min(newPosition.top, viewportHeight + window.scrollY - cardHeight - 20),
+          Math.min(newPosition.top, viewportHeight + window.scrollY - cardHeight - 40),
         )
         newPosition.left = Math.max(20, Math.min(newPosition.left, viewportWidth - cardWidth - 20))
+
+        // Special handling for the last step to ensure it's visible
+        if (currentStep === walkthroughSteps.length - 1) {
+          newPosition.top = Math.max(
+            20 + window.scrollY,
+            Math.min(newPosition.top, viewportHeight + window.scrollY - cardHeight - 80)
+          )
+        }
 
         setPosition(newPosition)
 

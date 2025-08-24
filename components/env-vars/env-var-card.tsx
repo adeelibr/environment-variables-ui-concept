@@ -3,8 +3,9 @@
 import type React from "react"
 
 import { useState } from "react"
-import type { EnvVar, Environment } from "@/types/env-vars"
-import { useEnvVarsStore } from "@/lib/env-vars-store"
+import type { EnvironmentVariable, Environment } from "@/types/env-vars"
+import { useEnvState } from "@/hooks/use-env-state"
+import { useEnvSelection } from "@/hooks/use-env-selection"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -13,7 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from "@/lib/utils"
 
 interface EnvVarCardProps {
-  variable: EnvVar
+  variable: EnvironmentVariable
   environment: Environment
   isSelected: boolean
   isDragging?: boolean
@@ -21,7 +22,8 @@ interface EnvVarCardProps {
 }
 
 export function EnvVarCard({ variable, environment, isSelected, isDragging = false, onSelect }: EnvVarCardProps) {
-  const { revealVariable, hideVariable, revealedVars, deleteVariable } = useEnvVarsStore()
+  const { deleteVariable } = useEnvState()
+  const { revealVariable, hideVariable, revealedVars } = useEnvSelection()
   const [copied, setCopied] = useState(false)
 
   const value = variable.values[environment]
@@ -171,7 +173,7 @@ export function EnvVarCard({ variable, environment, isSelected, isDragging = fal
 
         {/* Metadata */}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Updated {variable.updatedAt.toLocaleDateString()}</span>
+          <span>Updated {new Date(variable.updatedAt).toLocaleDateString()}</span>
           {variable.isSecret && (
             <Badge variant="outline" className="text-xs">
               Secret
