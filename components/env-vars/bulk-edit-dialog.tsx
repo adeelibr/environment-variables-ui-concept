@@ -8,8 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useChangeSets } from "@/hooks/use-change-sets"
-import { useEnvVariables } from "@/hooks/use-env-variables"
+import { useEnvState } from "@/hooks/use-env-state"
+import { useEnvHistory } from "@/hooks/use-env-history"
 import type { Environment } from "@/types/env-vars"
 
 interface BulkEditDialogProps {
@@ -18,8 +18,8 @@ interface BulkEditDialogProps {
 }
 
 export function BulkEditDialog({ isOpen, onClose }: BulkEditDialogProps) {
-  const { addChange } = useChangeSets()
-  const { variables } = useEnvVariables()
+  const { addVariable, variables } = useEnvState()
+  const { addHistoryEntry } = useEnvHistory()
   const [jsonInput, setJsonInput] = useState("")
   const [keyValueInput, setKeyValueInput] = useState("")
   const [selectedEnvironments, setSelectedEnvironments] = useState<Environment[]>(["development"])
@@ -119,21 +119,35 @@ export function BulkEditDialog({ isOpen, onClose }: BulkEditDialogProps) {
       }
 
       variables.forEach((variable) => {
-        const values: any = {}
-        selectedEnvironments.forEach((env) => {
-          values[env] = { after: variable.value }
-        })
+        const values = {
+          development: variable.values.development || undefined,
+          preview: variable.values.preview || undefined, 
+          production: variable.values.production || undefined,
+        }
 
-        addChange({
-          varId: `bulk-${Date.now()}-${variable.name}`,
+        addVariable({
           name: variable.name,
-          action: "create",
-          environments: selectedEnvironments,
+          description: variable.description,
+          isSecret: variable.isSecret,
           values,
-          isSecret: variable.isSecret || false,
-          description: `Bulk imported ${variable.name}`,
         })
       })
+
+      // Track in history
+      addHistoryEntry(
+        "bulk_operation",
+        `Bulk imported ${variables.length} variables`,
+        variables.map(variable => ({
+          id: Date.now().toString(),
+          varId: variable.id,
+          name: variable.name,
+          action: "create" as const,
+          environments: selectedEnvironments,
+          values: {},
+          isSecret: variable.isSecret,
+          description: `Bulk imported ${variable.name}`,
+        }))
+      )
 
       // Reset form and close
       setJsonInput("")
@@ -162,13 +176,12 @@ DEBUG=true`
       const keyValueLines: string[] = []
 
       variables.forEach((variable) => {
-        if (!variable?.name || !variable?.environments) return
+        if (!variable?.name || !variable?.values) return
 
         // Get the first available value from any environment
-        const environments = variable.environments
-        const devValue = environments.development?.value
-        const previewValue = environments.preview?.value
-        const prodValue = environments.production?.value
+        const devValue = variable.values.development
+        const previewValue = variable.values.preview
+        const prodValue = variable.values.production
         const value = devValue || previewValue || prodValue || ""
 
         if (value) {

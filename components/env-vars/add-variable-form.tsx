@@ -12,7 +12,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EnvironmentInputs } from "@/components/common/environment-inputs"
-import { useChangeSets } from "@/hooks/use-change-sets"
+import { useEnvState } from "@/hooks/use-env-state"
+import { useEnvHistory } from "@/hooks/use-env-history"
 import { validators, generateId } from "@/lib/common-utils"
 import { ENVIRONMENT_CONFIG } from "@/lib/constants"
 import type { Environment } from "@/types/env-vars"
@@ -23,7 +24,8 @@ interface AddVariableFormProps {
 }
 
 export function AddVariableForm({ isOpen, onClose }: AddVariableFormProps) {
-  const { addChange } = useChangeSets()
+  const { addVariable } = useEnvState()
+  const { addHistoryEntry } = useEnvHistory()
 
   const [formData, setFormData] = useState({
     name: "",
@@ -62,24 +64,35 @@ export function AddVariableForm({ isOpen, onClose }: AddVariableFormProps) {
 
     setErrors([])
 
-    const selectedEnvs = ENVIRONMENT_CONFIG
-      .filter((env) => formData.values[env.key].trim() !== "")
-      .map((env) => env.key)
-
-    const values: any = {}
-    selectedEnvs.forEach((env) => {
-      values[env] = { after: formData.values[env] }
-    })
-
-    addChange({
-      varId: `new-${generateId()}`,
+    // Create the new variable directly
+    const newVariable = addVariable({
       name: formData.name,
-      action: "create",
-      environments: selectedEnvs,
-      values,
+      description: formData.description,
       isSecret: formData.isSecret,
-      description: `Created ${formData.name}`,
+      values: {
+        development: formData.values.development || undefined,
+        preview: formData.values.preview || undefined,
+        production: formData.values.production || undefined,
+      },
     })
+
+    // Track in history
+    addHistoryEntry(
+      "variable_created",
+      `Created ${formData.name}`,
+      [{
+        id: Date.now().toString(),
+        varId: newVariable.id,
+        name: formData.name,
+        action: "create",
+        environments: ENVIRONMENT_CONFIG
+          .filter((env) => formData.values[env.key].trim() !== "")
+          .map((env) => env.key),
+        values: {},
+        isSecret: formData.isSecret,
+        description: `Created ${formData.name}`,
+      }]
+    )
 
     // Reset form
     setFormData({

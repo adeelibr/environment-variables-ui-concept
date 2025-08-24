@@ -6,7 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { useChangeSets } from "@/hooks/use-change-sets"
+import { useEnvState } from "@/hooks/use-env-state"
+import { useEnvHistory } from "@/hooks/use-env-history"
 import { ENVIRONMENTS, getEnvironmentLabel } from "@/lib/constants"
 import { transformers, generateId } from "@/lib/common-utils"
 import type { Environment } from "@/types/env-vars"
@@ -17,7 +18,8 @@ interface BulkPasteDialogProps {
 }
 
 export function BulkPasteDialog({ isOpen, onClose }: BulkPasteDialogProps) {
-  const { addChange } = useChangeSets()
+  const { addVariable } = useEnvState()
+  const { addHistoryEntry } = useEnvHistory()
   const [pasteText, setPasteText] = useState("")
   const [selectedEnvs, setSelectedEnvs] = useState<Environment[]>(["development"])
   const [isSecret, setIsSecret] = useState(false)
@@ -34,23 +36,36 @@ export function BulkPasteDialog({ isOpen, onClose }: BulkPasteDialogProps) {
 
     setErrors([])
     
-    // Add each variable as a separate change
-    parseResult.variables.forEach((variable) => {
+    // Add each variable directly
+    const createdVariables = parseResult.variables.map((variable) => {
       const values: any = {}
       selectedEnvs.forEach((env) => {
-        values[env] = { after: variable.value }
+        values[env] = variable.value
       })
 
-      addChange({
-        varId: `new-${generateId()}`,
+      return addVariable({
+        name: variable.name,
+        description: `Bulk imported variable`,
+        isSecret: isSecret || variable.isSecret,
+        values,
+      })
+    })
+
+    // Track in history
+    addHistoryEntry(
+      "bulk_operation",
+      `Bulk imported ${createdVariables.length} variables`,
+      createdVariables.map(variable => ({
+        id: Date.now().toString(),
+        varId: variable.id,
         name: variable.name,
         action: "create" as const,
         environments: selectedEnvs,
-        values,
-        isSecret: isSecret || variable.isSecret,
-        description: `Bulk imported variable`,
-      })
-    })
+        values: {},
+        isSecret: variable.isSecret,
+        description: `Bulk imported ${variable.name}`,
+      }))
+    )
 
     setPasteText("")
     setErrors([])

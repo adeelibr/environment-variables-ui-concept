@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useEnvVariables } from "@/hooks/use-env-variables"
+import { useEnvState } from "@/hooks/use-env-state"
 import { useEnvSelection } from "@/hooks/use-env-selection"
 import { useEnvSearch } from "@/hooks/use-env-search"
 import { Button } from "@/components/ui/button"
@@ -19,7 +19,7 @@ const environmentOptions = [
 ]
 
 export function EnvVarsHeader() {
-  const { variables } = useEnvVariables()
+  const { variables } = useEnvState()
   const { selectAll } = useEnvSelection()
   const { searchQuery, setSearchQuery, selectedEnvironments } = useEnvSearch(variables)
   const [showImport, setShowImport] = useState(false)

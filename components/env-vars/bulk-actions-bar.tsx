@@ -1,6 +1,6 @@
 "use client"
 
-import { useEnvVariables } from "@/hooks/use-env-variables"
+import { useEnvState } from "@/hooks/use-env-state"
 import { useEnvSelection } from "@/hooks/use-env-selection"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -15,7 +15,7 @@ import {
 import type { Environment } from "@/types/env-vars"
 
 export function BulkActionsBar() {
-  const { variables, deleteVariables } = useEnvVariables()
+  const { variables, deleteVariables } = useEnvState()
   const { selectedVarIds, bulkMode, clearSelection, revealedVars } = useEnvSelection()
 
   if (!bulkMode || selectedVarIds.length === 0) return null

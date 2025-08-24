@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import type { EnvironmentVariable, Environment } from "@/types/env-vars"
-import { useEnvVariables } from "@/hooks/use-env-variables"
+import { useEnvState } from "@/hooks/use-env-state"
 import { useEnvSelection } from "@/hooks/use-env-selection"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -22,7 +22,7 @@ interface EnvVarCardProps {
 }
 
 export function EnvVarCard({ variable, environment, isSelected, isDragging = false, onSelect }: EnvVarCardProps) {
-  const { deleteVariable } = useEnvVariables()
+  const { deleteVariable } = useEnvState()
   const { revealVariable, hideVariable, revealedVars } = useEnvSelection()
   const [copied, setCopied] = useState(false)
 
