@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { useChangeSetStore } from "@/lib/change-sets-store"
+import { useChangeSets } from "@/hooks/use-change-sets"
 import { ENVIRONMENTS, getEnvironmentLabel } from "@/lib/constants"
 import { transformers, generateId } from "@/lib/common-utils"
 import type { Environment } from "@/types/env-vars"
@@ -17,7 +17,7 @@ interface BulkPasteDialogProps {
 }
 
 export function BulkPasteDialog({ isOpen, onClose }: BulkPasteDialogProps) {
-  const { addBulkChanges } = useChangeSetStore()
+  const { addChange } = useChangeSets()
   const [pasteText, setPasteText] = useState("")
   const [selectedEnvs, setSelectedEnvs] = useState<Environment[]>(["development"])
   const [isSecret, setIsSecret] = useState(false)
@@ -34,13 +34,14 @@ export function BulkPasteDialog({ isOpen, onClose }: BulkPasteDialogProps) {
 
     setErrors([])
     
-    const changes = parseResult.variables.map((variable) => {
+    // Add each variable as a separate change
+    parseResult.variables.forEach((variable) => {
       const values: any = {}
       selectedEnvs.forEach((env) => {
         values[env] = { after: variable.value }
       })
 
-      return {
+      addChange({
         varId: `new-${generateId()}`,
         name: variable.name,
         action: "create" as const,
@@ -48,10 +49,9 @@ export function BulkPasteDialog({ isOpen, onClose }: BulkPasteDialogProps) {
         values,
         isSecret: isSecret || variable.isSecret,
         description: `Bulk imported variable`,
-      }
+      })
     })
 
-    addBulkChanges(changes)
     setPasteText("")
     setErrors([])
     onClose()

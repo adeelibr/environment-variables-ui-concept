@@ -5,7 +5,7 @@ import { X, GitBranch, Clock, AlertTriangle, Check } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useChangeSetStore } from "@/lib/change-sets-store"
+import { useChangeSets } from "@/hooks/use-change-sets"
 import { ChangePreview } from "./change-preview"
 
 interface ChangeSetDrawerProps {
@@ -14,23 +14,25 @@ interface ChangeSetDrawerProps {
 }
 
 export function ChangeSetDrawer({ isOpen, onClose }: ChangeSetDrawerProps) {
-  const { currentChangeSet, reviewChangeSet, applyChangeSet } = useChangeSetStore()
+  const { getCurrentChangeSet, applyChangeSet } = useChangeSets()
   const [isReviewing, setIsReviewing] = useState(false)
+  
+  const currentChangeSet = getCurrentChangeSet()
 
   if (!isOpen || !currentChangeSet) return null
 
   const handleReview = () => {
-    reviewChangeSet()
     setIsReviewing(true)
   }
 
   const handleApply = async () => {
-    await applyChangeSet(currentChangeSet.id)
+    applyChangeSet(currentChangeSet.id)
     onClose()
   }
 
   const changeCount = currentChangeSet.changes.length
-  const conflictCount = currentChangeSet.conflicts.length
+  // Note: conflicts functionality would need to be added to use-change-sets hook if needed
+  const conflictCount = 0
 
   return (
     <AnimatePresence>

@@ -1,6 +1,7 @@
 "use client"
 
-import { useEnvVarsStore } from "@/lib/env-vars-store"
+import { useEnvVariables } from "@/hooks/use-env-variables"
+import { useEnvSelection } from "@/hooks/use-env-selection"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Copy, Move, Eye, EyeOff, Trash2, Download, X, MoreHorizontal } from "lucide-react"
@@ -14,7 +15,8 @@ import {
 import type { Environment } from "@/types/env-vars"
 
 export function BulkActionsBar() {
-  const { selectedVarIds, bulkMode, clearSelection, deleteVariables, revealedVars, variables } = useEnvVarsStore()
+  const { variables, deleteVariables } = useEnvVariables()
+  const { selectedVarIds, bulkMode, clearSelection, revealedVars } = useEnvSelection()
 
   if (!bulkMode || selectedVarIds.length === 0) return null
 
@@ -39,6 +41,7 @@ export function BulkActionsBar() {
   const handleBulkDelete = () => {
     if (confirm(`Delete ${selectedVarIds.length} variables?`)) {
       deleteVariables(selectedVarIds)
+      clearSelection()
     }
   }
 

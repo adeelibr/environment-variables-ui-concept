@@ -1,7 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { useEnvVarsStore } from "@/lib/env-vars-store"
+import { useEnvVariables } from "@/hooks/use-env-variables"
+import { useEnvSelection } from "@/hooks/use-env-selection"
+import { useEnvSearch } from "@/hooks/use-env-search"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Plus, Upload, Download, Settings, Filter } from "lucide-react"
@@ -17,9 +19,9 @@ const environmentOptions = [
 ]
 
 export function EnvVarsHeader() {
-  const { searchQuery, setSearchQuery, selectedEnvironment, setSelectedEnvironment, selectAll, variables } =
-    useEnvVarsStore()
-
+  const { variables } = useEnvVariables()
+  const { selectAll } = useEnvSelection()
+  const { searchQuery, setSearchQuery, selectedEnvironments } = useEnvSearch(variables)
   const [showImport, setShowImport] = useState(false)
 
   const handleImport = () => {
@@ -37,8 +39,9 @@ export function EnvVarsHeader() {
     console.log("Create new variable")
   }
 
-  const currentEnvLabel =
-    environmentOptions.find((opt) => opt.value === selectedEnvironment)?.label || "All Environments"
+  const handleSelectAll = () => {
+    selectAll(variables.map(v => v.id))
+  }
 
   return (
     <div className="border-b border-border bg-card">
@@ -83,31 +86,8 @@ export function EnvVarsHeader() {
             />
           </div>
 
-          {/* Environment filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="min-w-[160px] justify-between bg-transparent">
-                <span className="flex items-center">
-                  <Filter className="h-4 w-4 mr-2" />
-                  {currentEnvLabel}
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {environmentOptions.map((option) => (
-                <DropdownMenuItem
-                  key={option.value}
-                  onClick={() => setSelectedEnvironment(option.value)}
-                  className={cn(selectedEnvironment === option.value && "bg-accent")}
-                >
-                  {option.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {/* Bulk select */}
-          <Button variant="outline" onClick={selectAll}>
+          <Button variant="outline" onClick={handleSelectAll}>
             Select All
           </Button>
 

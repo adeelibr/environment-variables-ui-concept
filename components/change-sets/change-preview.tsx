@@ -4,16 +4,23 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { X, Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react"
 import { useState } from "react"
-import { useChangeSetStore } from "@/lib/change-sets-store"
-import type { EnvVarChange, Environment } from "@/types/env-vars"
+import { useChangeSets } from "@/hooks/use-change-sets"
+import type { Change, Environment } from "@/types/env-vars"
 
 interface ChangePreviewProps {
-  change: EnvVarChange
+  change: Change
 }
 
 export function ChangePreview({ change }: ChangePreviewProps) {
-  const { removeChange } = useChangeSetStore()
+  const { removeChangeFromSet, getCurrentChangeSet } = useChangeSets()
   const [showValues, setShowValues] = useState(false)
+  const currentChangeSet = getCurrentChangeSet()
+
+  const handleRemove = () => {
+    if (currentChangeSet) {
+      removeChangeFromSet(currentChangeSet.id, change.id)
+    }
+  }
 
   const getActionIcon = () => {
     switch (change.action) {
@@ -95,7 +102,7 @@ export function ChangePreview({ change }: ChangePreviewProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => removeChange(change.id)}
+            onClick={handleRemove}
             className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
           >
             <X className="h-3 w-3" />
