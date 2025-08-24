@@ -1,0 +1,108 @@
+import type { EnvironmentVariable } from "@/types/env-vars"
+
+export const mockEnvVariables: EnvironmentVariable[] = [
+  {
+    id: "1",
+    name: "DATABASE_URL",
+    values: {
+      development: "postgresql://localhost:5432/myapp_dev",
+      preview: "postgresql://preview.db.com/myapp",
+      production: "postgresql://prod.db.com/myapp",
+    },
+    isSecret: true,
+    description: "Database connection string for PostgreSQL",
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "2",
+    name: "API_BASE_URL",
+    values: {
+      development: "http://localhost:3000/api",
+      preview: "https://preview.myapp.com/api",
+      production: "https://myapp.com/api",
+    },
+    isSecret: false,
+    description: "Base URL for API endpoints",
+    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "3",
+    name: "JWT_SECRET",
+    values: {
+      development: "dev-jwt-secret-key-12345",
+      preview: "preview-jwt-secret-key-67890",
+      production: "prod-jwt-secret-key-abcdef",
+    },
+    isSecret: true,
+    description: "Secret key for JWT token signing and verification",
+    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "4",
+    name: "STRIPE_PUBLIC_KEY",
+    values: {
+      development: "pk_test_51234567890abcdef",
+      preview: "pk_test_51234567890preview",
+      production: "pk_live_51234567890production",
+    },
+    isSecret: false,
+    description: "Stripe publishable key for payment processing",
+    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "5",
+    name: "STRIPE_SECRET_KEY",
+    values: {
+      development: "sk_test_51234567890secret",
+      preview: "sk_test_51234567890preview_secret",
+      production: "sk_live_51234567890production_secret",
+    },
+    isSecret: true,
+    description: "Stripe secret key for server-side payment operations",
+    createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "6",
+    name: "REDIS_URL",
+    values: {
+      development: "redis://localhost:6379",
+      preview: "redis://preview.redis.com:6379",
+      production: "redis://prod.redis.com:6379",
+    },
+    isSecret: true,
+    description: "Redis connection URL for caching and sessions",
+    createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "7",
+    name: "NEXT_PUBLIC_APP_URL",
+    values: {
+      development: "http://localhost:3000",
+      preview: "https://preview.myapp.com",
+      production: "https://myapp.com",
+    },
+    isSecret: false,
+    description: "Public app URL accessible from client-side code",
+    createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "8",
+    name: "EMAIL_SERVICE_API_KEY",
+    values: {
+      development: "dev-email-key-12345",
+      preview: "preview-email-key-67890",
+      production: "prod-email-key-abcdef",
+    },
+    isSecret: true,
+    description: "API key for email service provider",
+    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+  },
+]
