@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { X, GitBranch, Clock, AlertTriangle, Check } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useChangeSetStore } from "@/lib/change-sets-store"
@@ -32,7 +33,15 @@ export function ChangeSetDrawer({ isOpen, onClose }: ChangeSetDrawerProps) {
   const conflictCount = currentChangeSet.conflicts.length
 
   return (
-    <div className="fixed inset-y-0 right-0 w-96 bg-card border-l border-border shadow-xl z-50">
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ x: "100%" }}
+          animate={{ x: 0 }}
+          exit={{ x: "100%" }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="fixed inset-y-0 right-0 w-96 bg-card border-l border-border shadow-xl z-50"
+        >
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <GitBranch className="h-5 w-5 text-primary" />
@@ -101,6 +110,8 @@ export function ChangeSetDrawer({ isOpen, onClose }: ChangeSetDrawerProps) {
           </>
         )}
       </div>
-    </div>
-  )
+    </motion.div>
+  )}
+</AnimatePresence>
+)
 }

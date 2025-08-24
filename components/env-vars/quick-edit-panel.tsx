@@ -1,13 +1,15 @@
 "use client"
 
 import { useState } from "react"
-import { Save, X, Eye, EyeOff } from "lucide-react"
+import { Save, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
+import { EnvironmentInputs } from "@/components/common/environment-inputs"
 import { useChangeSets } from "@/hooks/use-change-sets"
+import { ENVIRONMENT_CONFIG } from "@/lib/constants"
 import type { EnvVar, Environment } from "@/types/env-vars"
 
 interface QuickEditPanelProps {
@@ -18,7 +20,6 @@ interface QuickEditPanelProps {
 export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
   const { addChange } = useChangeSets()
 
-  const [showSecrets, setShowSecrets] = useState(false)
   const [formData, setFormData] = useState(() => {
     if (!variable) return { name: "", description: "", isSecret: false, values: {} }
     return {
@@ -29,12 +30,6 @@ export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
     }
   })
 
-  const environments: { key: Environment; label: string }[] = [
-    { key: "development", label: "Development" },
-    { key: "preview", label: "Preview" },
-    { key: "production", label: "Production" },
-  ]
-
   const handleSave = () => {
     if (!variable) return
 
@@ -42,7 +37,7 @@ export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
     const values: any = {}
 
     // Check for changes in each environment
-    environments.forEach(({ key }) => {
+    ENVIRONMENT_CONFIG.forEach(({ key }) => {
       const oldValue = variable.environments?.[key]?.value || ""
       const newValue = formData.values[key] || ""
 
@@ -136,36 +131,14 @@ export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
             <Label htmlFor="edit-secret">Mark as secret</Label>
           </div>
 
-          {/* Show/Hide Secrets */}
-          {formData.isSecret && (
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" onClick={() => setShowSecrets(!showSecrets)}>
-                {showSecrets ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-                {showSecrets ? "Hide" : "Show"} Values
-              </Button>
-            </div>
-          )}
-
           {/* Environment Values */}
           <div className="space-y-4">
             <Label>Environment Values</Label>
-            <div className="space-y-3">
-              {environments.map(({ key, label }) => (
-                <div key={key} className="space-y-2">
-                  <Label htmlFor={`edit-${key}`} className="text-sm font-medium">
-                    {label}
-                  </Label>
-                  <Input
-                    id={`edit-${key}`}
-                    value={formData.values[key] || ""}
-                    onChange={(e) => handleValueChange(key, e.target.value)}
-                    placeholder={`Value for ${label.toLowerCase()}`}
-                    type={formData.isSecret && !showSecrets ? "password" : "text"}
-                    className="font-mono"
-                  />
-                </div>
-              ))}
-            </div>
+            <EnvironmentInputs
+              values={formData.values}
+              onChange={handleValueChange}
+              isSecret={formData.isSecret}
+            />
           </div>
 
           {/* Actions */}

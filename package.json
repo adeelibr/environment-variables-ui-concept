@@ -1,6 +1,7 @@
 {
-  "name": "my-v0-project",
+  "name": "environment-variables-ui",
   "version": "0.1.0",
+  "description": "A professional interface for managing environment variables across multiple environments with a change-sets workflow for safe deployments.",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -43,6 +44,7 @@
     "cmdk": "1.0.4",
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.1",
+    "framer-motion": "^12.23.12",
     "geist": "latest",
     "immer": "latest",
     "input-otp": "1.4.1",
