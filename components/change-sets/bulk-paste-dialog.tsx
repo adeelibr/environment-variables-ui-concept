@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { useChangeSetStore } from "@/lib/change-sets-store"
+import { ENVIRONMENTS, getEnvironmentLabel } from "@/lib/constants"
+import { transformers, generateId } from "@/lib/common-utils"
 import type { Environment } from "@/types/env-vars"
 
 interface BulkPasteDialogProps {
@@ -19,33 +21,39 @@ export function BulkPasteDialog({ isOpen, onClose }: BulkPasteDialogProps) {
   const [pasteText, setPasteText] = useState("")
   const [selectedEnvs, setSelectedEnvs] = useState<Environment[]>(["development"])
   const [isSecret, setIsSecret] = useState(false)
-
-  const environments: Environment[] = ["development", "preview", "production"]
+  const [errors, setErrors] = useState<string[]>([])
 
   const handlePaste = () => {
-    const lines = pasteText.split("\n").filter((line) => line.trim())
-    const changes = lines.map((line) => {
-      const [name, ...valueParts] = line.split("=")
-      const value = valueParts.join("=")
+    // Parse key-value pairs using common utility
+    const parseResult = transformers.parseKeyValuePairs(pasteText)
+    
+    if (!parseResult.success) {
+      setErrors(parseResult.errors)
+      return
+    }
 
+    setErrors([])
+    
+    const changes = parseResult.variables.map((variable) => {
       const values: any = {}
       selectedEnvs.forEach((env) => {
-        values[env] = { after: value }
+        values[env] = { after: variable.value }
       })
 
       return {
-        varId: undefined,
-        name: name.trim(),
+        varId: `new-${generateId()}`,
+        name: variable.name,
         action: "create" as const,
         environments: selectedEnvs,
         values,
-        isSecret,
+        isSecret: isSecret || variable.isSecret,
         description: `Bulk imported variable`,
       }
     })
 
     addBulkChanges(changes)
     setPasteText("")
+    setErrors([])
     onClose()
   }
 
@@ -80,20 +88,31 @@ REDIS_URL=redis://...`}
           <div>
             <label className="text-sm font-medium text-foreground mb-2 block">Apply to Environments</label>
             <div className="flex gap-2">
-              {environments.map((env) => (
+              {ENVIRONMENTS.map((env) => (
                 <div key={env} className="flex items-center space-x-2">
                   <Checkbox
                     id={env}
                     checked={selectedEnvs.includes(env)}
                     onCheckedChange={() => toggleEnvironment(env)}
                   />
-                  <label htmlFor={env} className="text-sm capitalize">
-                    {env}
+                  <label htmlFor={env} className="text-sm">
+                    {getEnvironmentLabel(env)}
                   </label>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Error Messages */}
+          {errors.length > 0 && (
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+              <ul className="list-disc list-inside text-sm text-destructive space-y-1">
+                {errors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="flex items-center space-x-2">
             <Checkbox id="secret" checked={isSecret} onCheckedChange={(checked) => setIsSecret(!!checked)} />
