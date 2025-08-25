@@ -20,6 +20,12 @@ This is a Next.js 15 React application for managing environment variables across
 - **Local Storage** for data persistence
 - **React hooks** for component state
 
+### Package Management
+- **PNPM** is the required package manager for this project
+- Always use `pnpm install` instead of `npm install` or `yarn`
+- When adding dependencies, update pnpm-lock.yaml with `pnpm install --no-frozen-lockfile`
+- CI/CD uses frozen lockfile, so ensure pnpm-lock.yaml is always up to date
+
 ### Code Style & Patterns
 - **TypeScript** - All code is strongly typed
 - **Functional Components** - Use function declarations with proper typing
