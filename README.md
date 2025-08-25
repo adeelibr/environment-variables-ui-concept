@@ -47,30 +47,30 @@ A powerful, user-friendly interface for managing environment variables across De
 ### Installation
 
 1. **Clone the repository**
-   ```bash
+   \`\`\`bash
    git clone https://github.com/adeelibr/environment-variables-ui-concept.git
    cd environment-variables-ui-concept
-   ```
+   \`\`\`
 
 2. **Install dependencies**
-   ```bash
+   \`\`\`bash
    npm install --legacy-peer-deps
-   ```
+   \`\`\`
 
 3. **Start development server**
-   ```bash
+   \`\`\`bash
    npm run dev
-   ```
+   \`\`\`
 
 4. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ### Production Build
 
-```bash
+\`\`\`bash
 npm run build
 npm start
-```
+\`\`\`
 
 ## 🎯 Usage Guide
 
@@ -136,7 +136,7 @@ Key configuration files:
 
 The application supports both light and dark themes. Customize colors in:
 
-```css
+\`\`\`css
 /* app/globals.css */
 :root {
   --primary: /* Your primary color */
@@ -144,7 +144,7 @@ The application supports both light and dark themes. Customize colors in:
   --foreground: /* Text color */
   /* ... more variables */
 }
-```
+\`\`\`
 
 ## 🤝 Contributing
 

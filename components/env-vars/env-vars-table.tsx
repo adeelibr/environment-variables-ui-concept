@@ -13,8 +13,8 @@ interface EnvVarsTableProps {
   onEditVariable?: (variable: EnvironmentVariable) => void
 }
 
-export function EnvVarsTable({ variables, onEditVariable }: EnvVarsTableProps) {
-  const { updateVariable, deleteVariable } = useEnvVariables()
+export function EnvVarsTable({ onEditVariable }: Omit<EnvVarsTableProps, "variables">) {
+  const { variables, updateVariable, deleteVariable } = useEnvVariables()
 
   const [visibleSecrets, setVisibleSecrets] = useState<Set<string>>(new Set())
   const [editingVar, setEditingVar] = useState<string | null>(null)
@@ -48,22 +48,35 @@ export function EnvVarsTable({ variables, onEditVariable }: EnvVarsTableProps) {
   }
 
   const saveChanges = (variable: EnvironmentVariable) => {
+    console.log("[v0] Saving changes for variable:", variable.name)
+    console.log("[v0] Edit values:", editValues)
+
     const newVariableValues = { ...variable.values }
 
-    // Update values based on editing state
-    const environments: Environment[] = ["development", "preview", "production"]
+    let hasChanges = false
+
     environments.forEach((env) => {
       const newValue = editValues[env]
-      newVariableValues[env] = newValue || undefined
+      const oldValue = variable.values[env]
+
+      if (newValue !== oldValue) {
+        newVariableValues[env] = newValue || undefined
+        hasChanges = true
+        console.log("[v0] Changed", env, "from", oldValue, "to", newValue)
+      }
     })
 
-    // Use unified update - all change tracking handled internally
-    updateVariable(variable.id, { values: newVariableValues })
-    setEditingVar(null)
+    if (hasChanges) {
+      setEditingVar(null)
+      updateVariable(variable.id, { values: newVariableValues })
+      console.log("[v0] Variable updated successfully")
+    } else {
+      console.log("[v0] No changes detected")
+      setEditingVar(null)
+    }
   }
 
   const handleDeleteVariable = (variable: EnvironmentVariable) => {
-    // Use unified delete - all change tracking handled internally
     deleteVariable(variable.id)
   }
 
@@ -77,9 +90,13 @@ export function EnvVarsTable({ variables, onEditVariable }: EnvVarsTableProps) {
       return (
         <Input
           value={editValues[env]}
-          onChange={(e) => setEditValues((prev) => ({ ...prev, [env]: e.target.value }))}
+          onChange={(e) => {
+            console.log("[v0] Input changed for", env, ":", e.target.value)
+            setEditValues((prev) => ({ ...prev, [env]: e.target.value }))
+          }}
           className="h-8 text-sm"
           type={variable.isSecret && !isVisible ? "password" : "text"}
+          placeholder={`Enter ${env} value`}
         />
       )
     }

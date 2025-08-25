@@ -47,20 +47,20 @@ This is a Next.js 15 React application for managing environment variables across
 - Atomic application across all environments
 
 ### Component Architecture
-```
+\`\`\`
 components/
 ├── ui/           # Base Radix UI components with custom styling
 ├── common/       # Reusable business logic components
 ├── env-vars/     # Environment variable specific features
 └── change-sets/  # Change-set workflow components
-```
+\`\`\`
 
 ## Coding Guidelines
 
 ### Component Patterns
 
 1. **Always use TypeScript interfaces for props**
-```tsx
+\`\`\`tsx
 interface MyComponentProps {
   title: string
   isVisible?: boolean
@@ -70,10 +70,10 @@ interface MyComponentProps {
 export function MyComponent({ title, isVisible = true, onAction }: MyComponentProps) {
   // Component logic
 }
-```
+\`\`\`
 
 2. **Use Framer Motion for animations**
-```tsx
+\`\`\`tsx
 import { motion, AnimatePresence } from "framer-motion"
 
 // For modal/drawer entries
@@ -91,10 +91,10 @@ import { motion, AnimatePresence } from "framer-motion"
   exit={{ x: "100%" }}
   transition={{ type: "spring", damping: 25, stiffness: 300 }}
 >
-```
+\`\`\`
 
 3. **Use common utilities and constants**
-```tsx
+\`\`\`tsx
 import { ENVIRONMENT_CONFIG } from "@/lib/constants"
 import { validators, copyToClipboard } from "@/lib/common-utils"
 
@@ -106,12 +106,12 @@ const nameValidation = validators.variableName(name)
 if (!nameValidation.isValid) {
   setErrors([nameValidation.error])
 }
-```
+\`\`\`
 
 ### State Management Patterns
 
 1. **Use custom hooks for complex logic**
-```tsx
+\`\`\`tsx
 // hooks/use-environment-form.ts
 export function useEnvironmentForm(initialData: EnvVar) {
   const [formData, setFormData] = useState(initialData)
@@ -123,21 +123,21 @@ export function useEnvironmentForm(initialData: EnvVar) {
   
   return { formData, setFormData, errors, handleSubmit }
 }
-```
+\`\`\`
 
 2. **Leverage existing stores**
-```tsx
+\`\`\`tsx
 import { useChangeSets } from "@/hooks/use-change-sets"
 import { useEnvVariables } from "@/hooks/use-env-variables"
 
 const { addChange, getCurrentChangeSet } = useChangeSets()
 const { variables, updateVariable } = useEnvVariables()
-```
+\`\`\`
 
 ### Form Handling
 
 1. **Use the common EnvironmentInputs component**
-```tsx
+\`\`\`tsx
 import { EnvironmentInputs } from "@/components/common/environment-inputs"
 
 <EnvironmentInputs
@@ -146,10 +146,10 @@ import { EnvironmentInputs } from "@/components/common/environment-inputs"
   isSecret={formData.isSecret}
   showLabels={true}
 />
-```
+\`\`\`
 
 2. **Implement proper validation**
-```tsx
+\`\`\`tsx
 const [errors, setErrors] = useState<string[]>([])
 
 const handleSubmit = () => {
@@ -178,7 +178,7 @@ const handleSubmit = () => {
     </ul>
   </div>
 )}
-```
+\`\`\`
 
 ## File Organization & Imports
 
@@ -221,7 +221,7 @@ const handleSubmit = () => {
 ## Common Patterns to Follow
 
 ### Modal/Drawer Components
-```tsx
+\`\`\`tsx
 import { AnimatePresence, motion } from "framer-motion"
 
 export function MyModal({ isOpen, onClose }: ModalProps) {
@@ -249,10 +249,10 @@ export function MyModal({ isOpen, onClose }: ModalProps) {
     </AnimatePresence>
   )
 }
-```
+\`\`\`
 
 ### Form Components
-```tsx
+\`\`\`tsx
 import { useState } from "react"
 import { EnvironmentInputs } from "@/components/common/environment-inputs"
 import { validators } from "@/lib/common-utils"
@@ -288,7 +288,7 @@ export function MyForm({ onSubmit }: FormProps) {
     </form>
   )
 }
-```
+\`\`\`
 
 ## Testing Considerations
 
