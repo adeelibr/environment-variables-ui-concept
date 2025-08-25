@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Save, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,6 +33,18 @@ export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
     }
   })
 
+  // Update formData when variable changes
+  useEffect(() => {
+    if (variable) {
+      setFormData({
+        name: variable.name,
+        description: variable.description || "",
+        isSecret: variable.isSecret,
+        values: { ...variable.values },
+      })
+    }
+  }, [variable])
+
   const handleSave = () => {
     if (!variable) return
 
@@ -48,7 +60,10 @@ export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
       
       if (oldValue !== newValue) {
         changedEnvs.push(env)
-        changedValues[env] = { before: oldValue, after: newValue || undefined }
+        changedValues[env] = { 
+          before: oldValue, 
+          after: newValue || undefined 
+        }
       }
     })
 
