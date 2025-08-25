@@ -65,33 +65,8 @@ export function useEnvHistory() {
     return entry && entry.variablesSnapshot
   }
 
-  // Simple change-set for staging changes (optional for future use)
-  const [pendingChanges, setPendingChanges] = useLocalStorage<Change[]>("pending-changes", [])
-
-  const addPendingChange = (change: Change) => {
-    setPendingChanges(prev => {
-      // Remove existing change for the same variable and environment
-      const filtered = prev.filter(c => 
-        !(c.varId === change.varId && JSON.stringify(c.environments) === JSON.stringify(change.environments))
-      )
-      return [...filtered, change]
-    })
-  }
-
-  const removePendingChange = (changeId: string) => {
-    setPendingChanges(prev => prev.filter(c => c.id !== changeId))
-  }
-
-  const clearPendingChanges = () => {
-    setPendingChanges([])
-  }
-
-  const commitPendingChanges = (message: string, variablesSnapshot?: any) => {
-    if (pendingChanges.length === 0) return
-
-    addHistoryEntry("bulk_operation", message, pendingChanges, variablesSnapshot)
-    clearPendingChanges()
-  }
+  // Removed pending changes functionality to avoid duplication with change-sets
+  // This hook now focuses purely on history/audit trail functionality
 
   return {
     // History operations
@@ -103,12 +78,5 @@ export function useEnvHistory() {
     getCommitHistory,
     getCommitDetails,
     canTimeTravel,
-    
-    // Optional change-set staging (for future use)
-    pendingChanges,
-    addPendingChange,
-    removePendingChange,
-    clearPendingChanges,
-    commitPendingChanges,
   }
 }
