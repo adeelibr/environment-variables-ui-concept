@@ -8,10 +8,6 @@ jest.mock('@/lib/constants', () => ({
   getAllEnvironments: () => ['development', 'preview', 'production']
 }))
 
-beforeEach(() => {
-  localStorage.clear()
-})
-
 describe('useEnvironments', () => {
   it('should initialize with all environments selected', () => {
     const { result } = renderHook(() => useEnvironments())

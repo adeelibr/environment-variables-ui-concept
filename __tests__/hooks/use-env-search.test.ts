@@ -7,10 +7,6 @@ jest.mock('@/lib/constants', () => ({
   ENVIRONMENTS: ['development', 'preview', 'production']
 }))
 
-beforeEach(() => {
-  localStorage.clear()
-})
-
 const mockVariables: EnvironmentVariable[] = [
   {
     id: '1',

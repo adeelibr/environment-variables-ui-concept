@@ -1,10 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
 import { useWalkthrough } from '@/hooks/use-walkthrough'
 
-beforeEach(() => {
-  localStorage.clear()
-})
-
 describe('useWalkthrough', () => {
   it('should initialize with walkthrough not completed', () => {
     const { result } = renderHook(() => useWalkthrough())

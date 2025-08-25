@@ -2,7 +2,6 @@ import { renderHook, act } from '@testing-library/react'
 import { useEnvSelection } from '@/hooks/use-env-selection'
 
 beforeEach(() => {
-  localStorage.clear()
   jest.clearAllTimers()
   jest.useFakeTimers()
 })

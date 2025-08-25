@@ -14,10 +14,6 @@ jest.mock('@/mock/change-sets', () => ({
   mockChangeSets: []
 }))
 
-beforeEach(() => {
-  localStorage.clear()
-})
-
 const mockChange: Omit<Change, 'id'> = {
   varId: 'var-1',
   name: 'TEST_VAR',

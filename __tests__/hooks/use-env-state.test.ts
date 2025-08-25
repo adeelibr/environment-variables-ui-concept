@@ -14,10 +14,6 @@ jest.mock('@/mock/env-variables', () => ({
   mockEnvVariables: []
 }))
 
-beforeEach(() => {
-  localStorage.clear()
-})
-
 const mockVariable: Omit<EnvironmentVariable, 'id' | 'createdAt' | 'updatedAt'> = {
   name: 'TEST_VAR',
   values: {
@@ -112,6 +108,8 @@ describe('useEnvState', () => {
       variableIds = [var1.id, var2.id]
     })
     
+    // Debug: Check the actual length after adding
+    console.log('Variables after adding:', result.current.variables.length)
     expect(result.current.variables).toHaveLength(3)
     
     // Delete multiple variables

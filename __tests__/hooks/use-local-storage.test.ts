@@ -9,7 +9,6 @@ beforeEach(() => {
 
 afterEach(() => {
   console.error = originalConsoleError
-  localStorage.clear()
 })
 
 describe('useLocalStorage', () => {

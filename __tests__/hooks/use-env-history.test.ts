@@ -2,10 +2,6 @@ import { renderHook, act } from '@testing-library/react'
 import { useEnvHistory } from '@/hooks/use-env-history'
 import type { Change } from '@/types/env-vars'
 
-beforeEach(() => {
-  localStorage.clear()
-})
-
 const mockChange: Change = {
   id: '1',
   varId: 'var-1',
