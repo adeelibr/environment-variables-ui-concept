@@ -31,8 +31,8 @@ export default function EnvironmentVariablesPage() {
     clearFilters,
   } = useEnvSearch(variables)
 
-  // Format history for display
-  const commitHistory = historyEntries.map(entry => ({
+  // Format history for display with safety check
+  const commitHistory = (historyEntries || []).map(entry => ({
     id: entry.id,
     timestamp: entry.timestamp,
     message: entry.description,
