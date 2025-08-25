@@ -4,8 +4,7 @@ import { useState, useEffect } from "react"
 import { Plus, GitBranch, Upload, Download, Search, Filter, HelpCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useEnvState } from "@/hooks/use-env-state"
-import { useEnvHistory } from "@/hooks/use-env-history"
+import { useEnvVariables } from "@/hooks/use-env-variables"
 import { useEnvSearch } from "@/hooks/use-env-search"
 import { useWalkthrough } from "@/hooks/use-walkthrough"
 import { ChangeSetDrawer } from "@/components/change-sets/change-set-drawer"
@@ -18,8 +17,7 @@ import { AppWalkthrough } from "@/components/walkthrough/app-walkthrough"
 import type { EnvironmentVariable } from "@/types/env-vars"
 
 export default function EnvironmentVariablesPage() {
-  const { variables } = useEnvState()
-  const { getCommitHistory } = useEnvHistory()
+  const { variables, historyEntries } = useEnvVariables()
   const { hasCompletedWalkthrough, markWalkthroughComplete } = useWalkthrough()
   const {
     searchQuery,
@@ -33,7 +31,14 @@ export default function EnvironmentVariablesPage() {
     clearFilters,
   } = useEnvSearch(variables)
 
-  const commitHistory = getCommitHistory()
+  // Format history for display
+  const commitHistory = historyEntries.map(entry => ({
+    id: entry.id,
+    timestamp: entry.timestamp,
+    message: entry.description,
+    action: entry.action,
+    changesCount: entry.changes.length,
+  }))
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isBulkPasteOpen, setIsBulkPasteOpen] = useState(false)

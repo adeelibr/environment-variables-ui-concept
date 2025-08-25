@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Save, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,8 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { EnvironmentInputs } from "@/components/common/environment-inputs"
-import { useEnvState } from "@/hooks/use-env-state"
-import { useEnvHistory } from "@/hooks/use-env-history"
+import { useEnvVariables } from "@/hooks/use-env-variables"
 import type { EnvironmentVariable, Environment } from "@/types/env-vars"
 
 interface QuickEditPanelProps {
@@ -18,8 +17,7 @@ interface QuickEditPanelProps {
 }
 
 export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
-  const { updateVariable } = useEnvState()
-  const { addHistoryEntry } = useEnvHistory()
+  const { updateVariable } = useEnvVariables()
 
   const [formData, setFormData] = useState(() => {
     if (!variable) return { name: "", description: "", isSecret: false, values: {} }
@@ -31,10 +29,22 @@ export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
     }
   })
 
+  // Update formData when variable changes
+  useEffect(() => {
+    if (variable) {
+      setFormData({
+        name: variable.name,
+        description: variable.description || "",
+        isSecret: variable.isSecret,
+        values: { ...variable.values },
+      })
+    }
+  }, [variable])
+
   const handleSave = () => {
     if (!variable) return
 
-    // Simple update - just update the variable directly
+    // Simple unified save operation - all change tracking is handled internally
     const updates = {
       name: formData.name,
       description: formData.description,
@@ -43,23 +53,6 @@ export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
     }
 
     updateVariable(variable.id, updates)
-
-    // Track in history
-    addHistoryEntry(
-      "variable_updated",
-      `Updated ${formData.name}`,
-      [{
-        id: Date.now().toString(),
-        varId: variable.id,
-        name: formData.name,
-        action: "update",
-        environments: ["development"], // Simplified - just track that it was updated
-        values: {},
-        isSecret: formData.isSecret,
-        description: `Updated ${formData.name}`,
-      }]
-    )
-
     onClose()
   }
 

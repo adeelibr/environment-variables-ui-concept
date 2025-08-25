@@ -5,8 +5,7 @@ import { Eye, EyeOff, Edit, Trash2, Copy, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { useEnvState } from "@/hooks/use-env-state"
-import { useEnvHistory } from "@/hooks/use-env-history"
+import { useEnvVariables } from "@/hooks/use-env-variables"
 import type { EnvironmentVariable, Environment } from "@/types/env-vars"
 
 interface EnvVarsTableProps {
@@ -15,8 +14,7 @@ interface EnvVarsTableProps {
 }
 
 export function EnvVarsTable({ variables, onEditVariable }: EnvVarsTableProps) {
-  const { updateVariable, deleteVariable } = useEnvState()
-  const { addHistoryEntry } = useEnvHistory()
+  const { updateVariable, deleteVariable } = useEnvVariables()
 
   const [visibleSecrets, setVisibleSecrets] = useState<Set<string>>(new Set())
   const [editingVar, setEditingVar] = useState<string | null>(null)
@@ -50,62 +48,23 @@ export function EnvVarsTable({ variables, onEditVariable }: EnvVarsTableProps) {
   }
 
   const saveChanges = (variable: EnvironmentVariable) => {
-    const changeSet = getOrCreateCurrentChangeSet()
-    const changedEnvs: Environment[] = []
-    const beforeValues: Record<Environment, string> = {}
-    const afterValues: Record<Environment, string> = {}
+    const newVariableValues = { ...variable.values }
 
+    // Update values based on editing state
+    const environments: Environment[] = ["development", "preview", "production"]
     environments.forEach((env) => {
-      const oldValue = variable.values[env] || ""
       const newValue = editValues[env]
-
-      if (oldValue !== newValue) {
-        changedEnvs.push(env)
-        beforeValues[env] = oldValue
-        afterValues[env] = newValue
-      }
+      newVariableValues[env] = newValue || undefined
     })
 
-    if (changedEnvs.length > 0) {
-      // Add to change set for review
-      addChangeToSet(changeSet.id, {
-        type: "update",
-        variableId: variable.id,
-        variableName: variable.name,
-        environments: changedEnvs,
-        beforeValues,
-        afterValues,
-        metadata: {
-          isSecret: variable.isSecret,
-          description: variable.description,
-        },
-      })
-    }
-
+    // Use unified update - all change tracking handled internally
+    updateVariable(variable.id, { values: newVariableValues })
     setEditingVar(null)
   }
 
   const handleDeleteVariable = (variable: EnvironmentVariable) => {
-    const changeSet = getOrCreateCurrentChangeSet()
-    const existingEnvs = environments.filter((env) => variable.values[env])
-    const beforeValues: Record<Environment, string> = {}
-
-    existingEnvs.forEach((env) => {
-      beforeValues[env] = variable.values[env] || ""
-    })
-
-    addChangeToSet(changeSet.id, {
-      type: "delete",
-      variableId: variable.id,
-      variableName: variable.name,
-      environments: existingEnvs,
-      beforeValues,
-      afterValues: {},
-      metadata: {
-        isSecret: variable.isSecret,
-        description: variable.description,
-      },
-    })
+    // Use unified delete - all change tracking handled internally
+    deleteVariable(variable.id)
   }
 
   const renderValue = (variable: EnvironmentVariable, env: Environment) => {
