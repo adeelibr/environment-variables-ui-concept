@@ -12,9 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EnvironmentInputs } from "@/components/common/environment-inputs"
-import { useEnvState } from "@/hooks/use-env-state"
-import { useEnvHistory } from "@/hooks/use-env-history"
-import { useChangeSets } from "@/hooks/use-change-sets"
+import { useEnvVariables } from "@/hooks/use-env-variables"
 import { validators, generateId } from "@/lib/common-utils"
 import { ENVIRONMENT_CONFIG } from "@/lib/constants"
 import type { Environment } from "@/types/env-vars"
@@ -25,9 +23,7 @@ interface AddVariableFormProps {
 }
 
 export function AddVariableForm({ isOpen, onClose }: AddVariableFormProps) {
-  const { addVariable } = useEnvState()
-  const { addHistoryEntry } = useEnvHistory()
-  const { getOrCreateCurrentChangeSet, addChangeToSet } = useChangeSets()
+  const { createVariable } = useEnvVariables()
 
   const [formData, setFormData] = useState({
     name: "",
@@ -66,8 +62,8 @@ export function AddVariableForm({ isOpen, onClose }: AddVariableFormProps) {
 
     setErrors([])
 
-    // Create the new variable directly  
-    const newVariable = addVariable({
+    // Create the new variable using the unified hook - all change tracking handled internally
+    createVariable({
       name: formData.name,
       description: formData.description,
       isSecret: formData.isSecret,
@@ -77,45 +73,6 @@ export function AddVariableForm({ isOpen, onClose }: AddVariableFormProps) {
         production: formData.values.production || undefined,
       },
     })
-
-    // Get environments that have values
-    const environmentsWithValues = ENVIRONMENT_CONFIG
-      .filter((env) => formData.values[env.key].trim() !== "")
-      .map((env) => env.key)
-
-    // Create change-set values structure
-    const changeSetValues: Record<Environment, { before?: string; after?: string }> = {}
-    environmentsWithValues.forEach((env) => {
-      changeSetValues[env] = { before: undefined, after: formData.values[env] }
-    })
-
-    // Add to change set for tracking
-    const changeSet = getOrCreateCurrentChangeSet()
-    addChangeToSet(changeSet.id, {
-      varId: newVariable.id,
-      name: formData.name,
-      action: "create",
-      environments: environmentsWithValues,
-      values: changeSetValues,
-      isSecret: formData.isSecret,
-      description: formData.description,
-    })
-
-    // Track in history for time travel
-    addHistoryEntry(
-      "variable_created",
-      `Created ${formData.name}`,
-      [{
-        id: Date.now().toString(),
-        varId: newVariable.id,
-        name: formData.name,
-        action: "create",
-        environments: environmentsWithValues,
-        values: {},
-        isSecret: formData.isSecret,
-        description: `Created ${formData.name}`,
-      }]
-    )
 
     // Reset form
     setFormData({

@@ -8,9 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { EnvironmentInputs } from "@/components/common/environment-inputs"
-import { useEnvState } from "@/hooks/use-env-state"
-import { useEnvHistory } from "@/hooks/use-env-history"
-import { useChangeSets } from "@/hooks/use-change-sets"
+import { useEnvVariables } from "@/hooks/use-env-variables"
 import type { EnvironmentVariable, Environment } from "@/types/env-vars"
 
 interface QuickEditPanelProps {
@@ -19,9 +17,7 @@ interface QuickEditPanelProps {
 }
 
 export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
-  const { updateVariable } = useEnvState()
-  const { addHistoryEntry } = useEnvHistory()
-  const { getOrCreateCurrentChangeSet, addChangeToSet } = useChangeSets()
+  const { updateVariable } = useEnvVariables()
 
   const [formData, setFormData] = useState(() => {
     if (!variable) return { name: "", description: "", isSecret: false, values: {} }
@@ -48,31 +44,7 @@ export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
   const handleSave = () => {
     if (!variable) return
 
-    const changeSet = getOrCreateCurrentChangeSet()
-    const changedEnvs: Environment[] = []
-    const changedValues: Record<Environment, { before?: string; after?: string }> = {}
-    
-    // Check what values changed
-    const environments: Environment[] = ["development", "preview", "production"]
-    environments.forEach((env) => {
-      const oldValue = variable.values[env]
-      const newValue = formData.values[env]
-      
-      if (oldValue !== newValue) {
-        changedEnvs.push(env)
-        changedValues[env] = { 
-          before: oldValue, 
-          after: newValue || undefined 
-        }
-      }
-    })
-
-    // Check if metadata changed
-    const nameChanged = variable.name !== formData.name
-    const descriptionChanged = variable.description !== formData.description
-    const secretChanged = variable.isSecret !== formData.isSecret
-    
-    // Always update the variable directly
+    // Simple unified save operation - all change tracking is handled internally
     const updates = {
       name: formData.name,
       description: formData.description,
@@ -81,42 +53,6 @@ export function QuickEditPanel({ variable, onClose }: QuickEditPanelProps) {
     }
 
     updateVariable(variable.id, updates)
-
-    // Add to change set if there were actual changes
-    if (changedEnvs.length > 0 || nameChanged || descriptionChanged || secretChanged) {
-      const metadataChanges: any = {}
-      if (nameChanged) metadataChanges.name = { before: variable.name, after: formData.name }
-      if (descriptionChanged) metadataChanges.description = { before: variable.description, after: formData.description }
-      if (secretChanged) metadataChanges.isSecret = { before: variable.isSecret, after: formData.isSecret }
-
-      addChangeToSet(changeSet.id, {
-        varId: variable.id,
-        name: formData.name,
-        action: "update",
-        environments: changedEnvs,
-        values: changedValues,
-        isSecret: formData.isSecret,
-        description: formData.description,
-        ...(Object.keys(metadataChanges).length > 0 && { metadataChanges })
-      })
-
-      // Track in history for time travel
-      addHistoryEntry(
-        "variable_updated",
-        `Updated ${formData.name}`,
-        [{
-          id: Date.now().toString(),
-          varId: variable.id,
-          name: formData.name,
-          action: "update",
-          environments: changedEnvs.length > 0 ? changedEnvs : ["development"], // Simplified - just track that it was updated
-          values: {},
-          isSecret: formData.isSecret,
-          description: `Updated ${formData.name}`,
-        }]
-      )
-    }
-
     onClose()
   }
 
