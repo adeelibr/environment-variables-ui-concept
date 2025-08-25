@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useEnvState } from "@/hooks/use-env-state"
 import { useEnvHistory } from "@/hooks/use-env-history"
-import type { Environment } from "@/types/env-vars"
+import type { Environment, EnvironmentVariable } from "@/types/env-vars"
 
 interface BulkEditDialogProps {
   isOpen: boolean
@@ -18,7 +18,7 @@ interface BulkEditDialogProps {
 }
 
 export function BulkEditDialog({ isOpen, onClose }: BulkEditDialogProps) {
-  const { addVariable, variables } = useEnvState()
+  const { addVariable, variables, bulkUpdate } = useEnvState()
   const { addHistoryEntry } = useEnvHistory()
   const [jsonInput, setJsonInput] = useState("")
   const [keyValueInput, setKeyValueInput] = useState("")
@@ -102,52 +102,94 @@ export function BulkEditDialog({ isOpen, onClose }: BulkEditDialogProps) {
     }
 
     try {
-      let variables: Array<{ name: string; value: string; isSecret?: boolean }> = []
+      let parsedVariables: Array<{ name: string; value: string; isSecret?: boolean }> = []
 
       if (jsonInput.trim()) {
-        variables = parseJsonInput()
+        parsedVariables = parseJsonInput()
       } else if (keyValueInput.trim()) {
-        variables = parseKeyValueInput()
+        parsedVariables = parseKeyValueInput()
       } else {
         setErrors(["Please provide variables in either JSON or KEY=VALUE format"])
         return
       }
 
-      if (variables.length === 0) {
+      if (parsedVariables.length === 0) {
         setErrors(["No variables found to add"])
         return
       }
 
-      variables.forEach((variable) => {
-        const values = {
-          development: variable.values.development || undefined,
-          preview: variable.values.preview || undefined, 
-          production: variable.values.production || undefined,
-        }
+      const updates: Array<{ id: string; updates: Partial<EnvironmentVariable> }> = []
+      const newVariables: Array<{
+        name: string
+        description: string
+        isSecret: boolean
+        values: Record<string, string>
+      }> = []
 
-        addVariable({
-          name: variable.name,
-          description: variable.description,
-          isSecret: variable.isSecret,
-          values,
+      parsedVariables.forEach((variable) => {
+        const existingVariable = variables.find((v) => v.name === variable.name)
+        const values: Record<string, string> = {}
+
+        // Apply the same value to all selected environments
+        selectedEnvironments.forEach((env) => {
+          values[env] = variable.value
         })
+
+        if (existingVariable) {
+          // Update existing variable
+          console.log("[v0] Updating existing variable:", variable.name, "in environments:", selectedEnvironments)
+          updates.push({
+            id: existingVariable.id,
+            updates: {
+              values: { ...existingVariable.values, ...values },
+              isSecret: variable.isSecret !== undefined ? variable.isSecret : existingVariable.isSecret,
+              updatedAt: new Date().toISOString(),
+            },
+          })
+        } else {
+          // Add new variable
+          console.log("[v0] Adding new variable:", variable.name, "to environments:", selectedEnvironments)
+          newVariables.push({
+            name: variable.name,
+            description: `Bulk imported variable`,
+            isSecret: variable.isSecret || false,
+            values,
+          })
+        }
       })
 
-      // Track in history
+      // Apply bulk updates for existing variables
+      if (updates.length > 0) {
+        bulkUpdate(updates)
+      }
+
+      // Add new variables
+      newVariables.forEach((variable) => {
+        addVariable(variable)
+      })
+
       addHistoryEntry(
         "bulk_operation",
-        `Bulk imported ${variables.length} variables`,
-        variables.map(variable => ({
-          id: Date.now().toString(),
-          varId: variable.id,
+        `Bulk imported ${parsedVariables.length} variables`,
+        parsedVariables.map((variable, index) => ({
+          id: `bulk-${Date.now()}-${index}`, // Generate proper ID
+          varId: `var-${Date.now()}-${index}`, // Generate proper varId
           name: variable.name,
           action: "create" as const,
           environments: selectedEnvironments,
-          values: {},
-          isSecret: variable.isSecret,
+          values: selectedEnvironments.reduce(
+            (acc, env) => {
+              acc[env] = variable.value
+              return acc
+            },
+            {} as Record<string, string>,
+          ), // Create proper values object
+          isSecret: variable.isSecret || false,
           description: `Bulk imported ${variable.name}`,
-        }))
+        })),
       )
+
+      console.log("[v0] Bulk edit completed successfully - Updated:", updates.length, "Added:", newVariables.length)
 
       // Reset form and close
       setJsonInput("")
@@ -155,6 +197,7 @@ export function BulkEditDialog({ isOpen, onClose }: BulkEditDialogProps) {
       setSelectedEnvironments(["development"])
       onClose()
     } catch (error) {
+      console.error("[v0] Bulk edit error:", error)
       setErrors([error instanceof Error ? error.message : "Failed to parse variables"])
     }
   }

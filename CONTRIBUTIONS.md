@@ -15,26 +15,26 @@ Thank you for your interest in contributing to the Environment Variables UI! Thi
 ### Development Setup
 
 1. **Fork the Repository**
-   ```bash
+   \`\`\`bash
    git clone https://github.com/YOUR_USERNAME/environment-variables-ui-concept.git
    cd environment-variables-ui-concept
-   ```
+   \`\`\`
 
 2. **Install Dependencies**
-   ```bash
+   \`\`\`bash
    npm install --legacy-peer-deps
-   ```
+   \`\`\`
 
 3. **Start Development Server**
-   ```bash
+   \`\`\`bash
    npm run dev
-   ```
+   \`\`\`
 
 4. **Build and Test**
-   ```bash
+   \`\`\`bash
    npm run build
    npm run lint
-   ```
+   \`\`\`
 
 ## 📋 Contribution Guidelines
 
@@ -51,7 +51,7 @@ Thank you for your interest in contributing to the Environment Variables UI! Thi
 
 ### Project Structure
 
-```
+\`\`\`
 ├── app/                    # Next.js app router
 ├── components/
 │   ├── ui/                # Base UI components
@@ -62,7 +62,7 @@ Thank you for your interest in contributing to the Environment Variables UI! Thi
 ├── lib/                   # Utility functions and constants
 ├── types/                 # TypeScript type definitions
 └── mock/                  # Mock data for development
-```
+\`\`\`
 
 ### Component Guidelines
 
@@ -72,7 +72,7 @@ Thank you for your interest in contributing to the Environment Variables UI! Thi
    - Include TypeScript interfaces for props
 
 2. **Component Structure**
-   ```tsx
+   \`\`\`tsx
    "use client"
    
    import { useState } from "react"
@@ -89,7 +89,7 @@ Thank you for your interest in contributing to the Environment Variables UI! Thi
    export function MyComponent({ title, isVisible = true, onClose }: MyComponentProps) {
      // Component logic
    }
-   ```
+   \`\`\`
 
 3. **Animation Guidelines**
    - Use Framer Motion for animations
@@ -128,7 +128,7 @@ When reporting bugs, please include:
 5. **Error Messages**: Console logs or error traces
 
 **Bug Report Template:**
-```markdown
+\`\`\`markdown
 ## Bug Description
 Brief description of the issue
 
@@ -148,7 +148,7 @@ What actually happened
 - Browser: Chrome 120.0
 - OS: macOS 14.0
 - Node.js: 18.17.0
-```
+\`\`\`
 
 ### ✨ Feature Requests
 
@@ -164,9 +164,9 @@ For new features, please provide:
 #### Pull Request Process
 
 1. **Create Feature Branch**
-   ```bash
+   \`\`\`bash
    git checkout -b feature/your-feature-name
-   ```
+   \`\`\`
 
 2. **Make Changes**
    - Write clean, documented code
@@ -174,15 +174,15 @@ For new features, please provide:
    - Add TypeScript types for all new code
 
 3. **Test Changes**
-   ```bash
+   \`\`\`bash
    npm run build
    npm run lint
-   ```
+   \`\`\`
 
 4. **Commit Changes**
-   ```bash
+   \`\`\`bash
    git commit -m "feat: add new environment validation feature"
-   ```
+   \`\`\`
 
    Use conventional commit messages:
    - `feat:` - New features
@@ -194,9 +194,9 @@ For new features, please provide:
    - `chore:` - Build process or auxiliary tool changes
 
 5. **Push and Create PR**
-   ```bash
+   \`\`\`bash
    git push origin feature/your-feature-name
-   ```
+   \`\`\`
 
 #### Pull Request Guidelines
 
@@ -207,7 +207,7 @@ For new features, please provide:
 - **Breaking Changes**: Clearly mark any breaking changes
 
 **PR Template:**
-```markdown
+\`\`\`markdown
 ## What Changed
 Brief description of changes
 
@@ -225,7 +225,7 @@ Before/after images (if applicable)
 - [ ] Self-review of code completed
 - [ ] Changes tested locally
 - [ ] Documentation updated (if needed)
-```
+\`\`\`
 
 ## 🎨 Design Guidelines
 
@@ -267,7 +267,7 @@ Currently, the project doesn't have a test suite, but we encourage:
 - **Interfaces**: Document TypeScript interfaces with JSDoc
 - **Functions**: Provide clear parameter and return descriptions
 
-```tsx
+\`\`\`tsx
 /**
  * Validates environment variable name format
  * @param name - Variable name to validate
@@ -276,7 +276,7 @@ Currently, the project doesn't have a test suite, but we encourage:
 export function validateVariableName(name: string): ValidationResult {
   // Implementation
 }
-```
+\`\`\`
 
 ### README Updates
 
